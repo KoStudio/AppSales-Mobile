@@ -163,9 +163,11 @@
 			NSURL *URL = [NSURL URLWithString:@"https://reportingitc-reporter.apple.com/reportservice/sales/v1"];
 
 			NSString *command = [NSString stringWithFormat:@"[p=Reporter.properties, Sales.getReport, %@,Sales,Summary,%@,%@]", vendorID, dateType, reportDateString];
+            
 			NSDictionary *body = @{
-				@"userid" : escapedUsername,
-				@"password" : escapedPassword,
+				//@"userid" : escapedUsername,
+				//@"password" : escapedPassword,
+                @"accesstoken": escapedPassword,//edited by ko 17.07.24
 				@"version" : @"2.0",
 				@"mode" : @"Normal",
 				@"queryInput" : command

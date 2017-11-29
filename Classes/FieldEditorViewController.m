@@ -544,7 +544,7 @@
 
 + (FieldSpecifier *)passwordFieldWithKey:(NSString *)k title:(NSString *)passwordTitle defaultValue:(NSString *)defaultPassword
 {
-	FieldSpecifier *field = [FieldSpecifier fieldWithType:FieldSpecifierTypePassword key:k];
+	FieldSpecifier *field = [FieldSpecifier fieldWithType:FieldSpecifierTypeText/*FieldSpecifierTypePassword*/ key:k];
 	field.title = passwordTitle;
 	field.defaultValue = defaultPassword;
 	return field;
