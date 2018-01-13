@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		0CE82C9B200A673100FA531D /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 0CE82C9A200A673100FA531D /* LaunchScreen.storyboard */; };
 		6D81575414CB3C2B005E8F3F /* KKKeychain.m in Sources */ = {isa = PBXBuildFile; fileRef = 6D81574914CB3C2B005E8F3F /* KKKeychain.m */; };
 		6D81575514CB3C2B005E8F3F /* KKPasscodeLock.m in Sources */ = {isa = PBXBuildFile; fileRef = 6D81574B14CB3C2B005E8F3F /* KKPasscodeLock.m */; };
 		6D81575614CB3C2B005E8F3F /* KKPasscodeSettingsViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 6D81574D14CB3C2B005E8F3F /* KKPasscodeSettingsViewController.m */; };
@@ -625,6 +626,7 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		0CE82C9A200A673100FA531D /* LaunchScreen.storyboard */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.storyboard; path = LaunchScreen.storyboard; sourceTree = "<group>"; };
 		6D81574814CB3C2B005E8F3F /* KKKeychain.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = KKKeychain.h; sourceTree = "<group>"; };
 		6D81574914CB3C2B005E8F3F /* KKKeychain.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = KKKeychain.m; sourceTree = "<group>"; };
 		6D81574A14CB3C2B005E8F3F /* KKPasscodeLock.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = KKPasscodeLock.h; sourceTree = "<group>"; };
@@ -1433,6 +1435,7 @@
 		7F709D3413BC98860008DBAD /* Supporting Files */ = {
 			isa = PBXGroup;
 			children = (
+				0CE82C9A200A673100FA531D /* LaunchScreen.storyboard */,
 				7FDF6E9813D8D4AD00B8CC4E /* Flag Images */,
 				7F709D6F13BCCB8B0008DBAD /* Images */,
 				7F709D3513BC98860008DBAD /* AppSales-Info.plist */,
@@ -2295,6 +2298,7 @@
 				7FDF70B213D8D4AE00B8CC4E /* bg.png in Resources */,
 				7FDF70B313D8D4AE00B8CC4E /* bg@2x.png in Resources */,
 				7FDF70B413D8D4AE00B8CC4E /* bh.png in Resources */,
+				0CE82C9B200A673100FA531D /* LaunchScreen.storyboard in Resources */,
 				7FDF70B513D8D4AE00B8CC4E /* bh@2x.png in Resources */,
 				7FDF70B613D8D4AE00B8CC4E /* bi.png in Resources */,
 				7FDF70B713D8D4AE00B8CC4E /* bi@2x.png in Resources */,
@@ -2904,7 +2908,6 @@
 			buildSettings = {
 				ARCHS = "$(ARCHS_STANDARD)";
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
-				ASSETCATALOG_COMPILER_LAUNCHIMAGE_NAME = LaunchImage;
 				DEVELOPMENT_TEAM = D7G488KFCE;
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "OtherSources/AppSales-Prefix.pch";
@@ -2923,7 +2926,6 @@
 			buildSettings = {
 				ARCHS = "$(ARCHS_STANDARD)";
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
-				ASSETCATALOG_COMPILER_LAUNCHIMAGE_NAME = LaunchImage;
 				DEVELOPMENT_TEAM = D7G488KFCE;
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "OtherSources/AppSales-Prefix.pch";
