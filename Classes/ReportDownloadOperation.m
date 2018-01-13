@@ -168,7 +168,7 @@
 				//@"userid" : escapedUsername,
 				//@"password" : escapedPassword,
                 @"accesstoken": escapedPassword,//edited by ko 17.07.24
-				@"version" : @"2.0",
+				@"version" : @"2.2",
 				@"mode" : @"Normal",
 				@"queryInput" : command
 			};
