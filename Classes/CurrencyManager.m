@@ -86,7 +86,12 @@
 	if (!self.lastRefresh) self.lastRefresh = [NSDate dateWithTimeIntervalSince1970:1225397963]; //Oct, 30, 2008
 	
 	exchangeRates = [[[NSUserDefaults standardUserDefaults] objectForKey:@"CurrencyManagerExchangeRates"] retain];
-	if (!exchangeRates) {
+    
+    //
+    //finacy.yahoo.com已经不能获取rate.csv，
+    // 这里始终使用 默认的预设值，(NSUserDefaults中缓存的有可能不正确)
+    // edited by ko 19.01.29
+	if (true/*!exchangeRates*/) {
 		exchangeRates = [NSMutableDictionary new];
 		[exchangeRates setObject:[NSNumber numberWithFloat:0.2178] forKey:@"\"AED/EUR\""];
 		[exchangeRates setObject:[NSNumber numberWithFloat:0.5096] forKey:@"\"AUD/EUR\""];
