@@ -14,6 +14,7 @@
 #import "SSKeychain.h"
 #import "ASAccount.h"
 #import "SalesViewController.h"
+#import "UINavigationBar+statusBar.h"
 
 @implementation AppSalesAppDelegate
 
@@ -46,10 +47,19 @@
 		UINavigationController *navigationController = [[[UINavigationController alloc] initWithRootViewController:rootViewController] autorelease];
 		navigationController.toolbarHidden = NO;
 		navigationController.navigationBar.translucent = NO;
+        if (@available(iOS 13.0, *)) {
+            navigationController.navigationBar.backgroundColor = UIColor.systemBackgroundColor;
+            [navigationController.navigationBar setStatusBgColor:UIColor.systemBackgroundColor];
+        } else {
+            // Fallback on earlier versions
+            navigationController.navigationBar.tintColor = UIColor.systemBackgroundColor;
+        }
 		self.accountsViewController = rootViewController;
 		
 		self.window.rootViewController = navigationController;
 		[self.window makeKeyAndVisible];
+        
+        
 	} else {
 		self.accountsViewController = [[[AccountsViewController alloc] initWithStyle:UITableViewStyleGrouped] autorelease];
 		self.accountsViewController.managedObjectContext = self.managedObjectContext;
@@ -57,6 +67,8 @@
 		self.accountsViewController.delegate = self;
 		UINavigationController *accountsNavController = [[[UINavigationController alloc] initWithRootViewController:self.accountsViewController] autorelease];
 		accountsNavController.navigationBar.translucent = NO;
+        accountsNavController.navigationController.navigationBar.backgroundColor = UIColor.systemBackgroundColor;
+        
 		accountsNavController.toolbarHidden = NO;
 		self.accountsPopover = [[[UIPopoverController alloc] initWithContentViewController:accountsNavController] autorelease];	
 		[self loadAccount:nil];

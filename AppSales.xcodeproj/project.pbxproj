@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		0CB834232762229F00A5C319 /* UINavigationBar+statusBar.m in Sources */ = {isa = PBXBuildFile; fileRef = 0CB834222762229F00A5C319 /* UINavigationBar+statusBar.m */; };
 		0CE82C9B200A673100FA531D /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 0CE82C9A200A673100FA531D /* LaunchScreen.storyboard */; };
 		6D81575414CB3C2B005E8F3F /* KKKeychain.m in Sources */ = {isa = PBXBuildFile; fileRef = 6D81574914CB3C2B005E8F3F /* KKKeychain.m */; };
 		6D81575514CB3C2B005E8F3F /* KKPasscodeLock.m in Sources */ = {isa = PBXBuildFile; fileRef = 6D81574B14CB3C2B005E8F3F /* KKPasscodeLock.m */; };
@@ -626,6 +627,8 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		0CB834212762229F00A5C319 /* UINavigationBar+statusBar.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "UINavigationBar+statusBar.h"; sourceTree = "<group>"; };
+		0CB834222762229F00A5C319 /* UINavigationBar+statusBar.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = "UINavigationBar+statusBar.m"; sourceTree = "<group>"; };
 		0CE82C9A200A673100FA531D /* LaunchScreen.storyboard */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.storyboard; path = LaunchScreen.storyboard; sourceTree = "<group>"; };
 		6D81574814CB3C2B005E8F3F /* KKKeychain.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = KKKeychain.h; sourceTree = "<group>"; };
 		6D81574914CB3C2B005E8F3F /* KKKeychain.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = KKKeychain.m; sourceTree = "<group>"; };
@@ -1615,6 +1618,8 @@
 				7FFE4BB013BD497A00D9D078 /* RegexKitLite.m */,
 				7F398EBB13DE1F2D004BEC44 /* MBProgressHUD.h */,
 				7F398EBC13DE1F2D004BEC44 /* MBProgressHUD.m */,
+				0CB834212762229F00A5C319 /* UINavigationBar+statusBar.h */,
+				0CB834222762229F00A5C319 /* UINavigationBar+statusBar.m */,
 			);
 			name = Helpers;
 			sourceTree = "<group>";
@@ -2215,6 +2220,7 @@
 			developmentRegion = English;
 			hasScannedForEncodings = 0;
 			knownRegions = (
+				English,
 				en,
 			);
 			mainGroup = 7F709D1C13BC98860008DBAD;
@@ -2832,6 +2838,7 @@
 				6D81575714CB3C2B005E8F3F /* KKPasscodeViewController.m in Sources */,
 				7FDCCE7D1594316600124140 /* ioapi.c in Sources */,
 				7FDCCE7F1594316600124140 /* unzip.c in Sources */,
+				0CB834232762229F00A5C319 /* UINavigationBar+statusBar.m in Sources */,
 				7FDCCE801594316600124140 /* zip.c in Sources */,
 				7FDCCE8B1594317300124140 /* FileInZipInfo.m in Sources */,
 				7FDCCE8C1594317300124140 /* ZipException.m in Sources */,
