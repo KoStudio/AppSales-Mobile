@@ -8,6 +8,7 @@
 
 #import "ReportCSVViewController.h"
 #import "Report.h"
+#import "ASAlertPresenter.h"
 
 
 @implementation ReportCSVViewController
@@ -73,7 +74,7 @@
 	}
 	
 	if (![MFMailComposeViewController canSendMail]) {
-		[[[[UIAlertView alloc] initWithTitle:NSLocalizedString(@"No Email Account", nil) message:NSLocalizedString(@"You have not configured this device for sending email.", nil) delegate:nil cancelButtonTitle:NSLocalizedString(@"OK", nil) otherButtonTitles:nil] autorelease] show];
+		ASShowAlert(self, NSLocalizedString(@"No Email Account", nil), NSLocalizedString(@"You have not configured this device for sending email.", nil));
 	} else {
 		MFMailComposeViewController *vc = [[[MFMailComposeViewController alloc] init] autorelease];
 		[vc setSubject:filename];

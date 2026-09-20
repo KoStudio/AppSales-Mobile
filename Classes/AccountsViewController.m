@@ -22,6 +22,7 @@
 #import "KKPasscodeLock.h"
 #import "ZipFile.h"
 #import "ZipWriteStream.h"
+#import "ASAlertPresenter.h"
 
 #define kAddNewAccountEditorIdentifier		@"AddNewAccountEditorIdentifier"
 #define kEditAccountEditorIdentifier		@"EditAccountEditorIdentifier"
@@ -109,11 +110,7 @@
 	for (ASAccount *account in self.accounts) {
 		if (account.password && account.password.length > 0) { //Only download reports for accounts with login
 			if (!account.vendorID || account.vendorID.length == 0) {
-				[[[[UIAlertView alloc] initWithTitle:NSLocalizedString(@"Vendor ID Missing", nil) 
-											 message:[NSString stringWithFormat:NSLocalizedString(@"You have not entered a vendor ID for the account \"%@\". Please go to the account's settings and fill in the missing information.", nil), [account displayName]] 
-											delegate:nil 
-								   cancelButtonTitle:NSLocalizedString(@"OK", nil) 
-								   otherButtonTitles:nil] autorelease] show];
+				ASShowAlert(self, NSLocalizedString(@"Vendor ID Missing", nil), [NSString stringWithFormat:NSLocalizedString(@"You have not entered a vendor ID for the account \"%@\". Please go to the account's settings and fill in the missing information.", nil), [account displayName]]);
 			} else {
 				[[ReportDownloadCoordinator sharedReportDownloadCoordinator] downloadReportsForAccount:account];
 			}
@@ -438,12 +435,12 @@
 		NSString *vendorID = [returnValues objectForKey:kAccountVendorID];
 		NSString *title = [returnValues objectForKey:kAccountTitle];
 		if ((!username || [username isEqualToString:@""]) && (!title || [title isEqualToString:@""])) {
-			[[[[UIAlertView alloc] initWithTitle:NSLocalizedString(@"Missing Information", nil) message:NSLocalizedString(@"You need to enter at least a username or a description.\n\nIf you want to download reports from iTunes Connect, you need to enter your username and password, otherwise you can just enter a description.", nil) delegate:nil cancelButtonTitle:NSLocalizedString(@"OK", nil) otherButtonTitles:nil] autorelease] show];
+			ASShowAlert(self, NSLocalizedString(@"Missing Information", nil), NSLocalizedString(@"You need to enter at least a username or a description.\n\nIf you want to download reports from iTunes Connect, you need to enter your username and password, otherwise you can just enter a description.", nil));
 			return;
 		}
 		if ([editor.editorIdentifier isEqualToString:kAddNewAccountEditorIdentifier]) {
 			if (password && password.length > 0 && (!vendorID || vendorID.length == 0)) {
-				[[[[UIAlertView alloc] initWithTitle:NSLocalizedString(@"Missing Information", nil) message:NSLocalizedString(@"You need to enter a vendor ID. If you don't know your vendor ID, tap \"Auto-Fill Vendor ID\".", nil) delegate:nil cancelButtonTitle:NSLocalizedString(@"OK", nil) otherButtonTitles:nil] autorelease] show];
+				ASShowAlert(self, NSLocalizedString(@"Missing Information", nil), NSLocalizedString(@"You need to enter a vendor ID. If you don't know your vendor ID, tap \"Auto-Fill Vendor ID\".", nil));
 				return;
 			}
 			ASAccount *account = (ASAccount *)[NSEntityDescription insertNewObjectForEntityForName:@"Account" inManagedObjectContext:self.managedObjectContext];
@@ -517,19 +514,16 @@
 	} else if ([key isEqualToString:kImportReportsButton]) {
 		ASAccount *account = (ASAccount *)editor.context;
 		if (account.isDownloadingReports) {
-			[[[[UIAlertView alloc] initWithTitle:nil message:NSLocalizedString(@"AppSales is already importing reports for this account. Please wait until the current import has finished.", nil) delegate:nil cancelButtonTitle:NSLocalizedString(@"OK", nil) otherButtonTitles:nil] autorelease] show];
+			ASShowAlert(self, nil, NSLocalizedString(@"AppSales is already importing reports for this account. Please wait until the current import has finished.", nil));
 		} else {
 			BOOL canStartImport = [ReportImportOperation filesAvailableToImport];
 			if (!canStartImport) {
-				[[[[UIAlertView alloc] initWithTitle:NSLocalizedString(@"No Files Found", nil) message:NSLocalizedString(@"The Documents directory does not contain any .txt files. Please use iTunes File Sharing to transfer report files to your device.", nil) delegate:nil cancelButtonTitle:NSLocalizedString(@"OK", nil) otherButtonTitles:nil] autorelease] show];
+				ASShowAlert(self, NSLocalizedString(@"No Files Found", nil), NSLocalizedString(@"The Documents directory does not contain any .txt files. Please use iTunes File Sharing to transfer report files to your device.", nil));
 			} else {
-				UIAlertView *confirmImportAlert = [[[UIAlertView alloc] initWithTitle:NSLocalizedString(@"Begin Import?", nil) 
-																			  message:NSLocalizedString(@"Do you want to start importing all report files in the Documents directory into this account?", nil) 
-																			 delegate:self 
-																	cancelButtonTitle:NSLocalizedString(@"Cancel", nil) 
-																	otherButtonTitles:NSLocalizedString(@"Start Import", nil), nil] autorelease];
-				confirmImportAlert.tag = kAlertTagConfirmImport;
-				[confirmImportAlert show];
+				ASConfirmAlert(self, NSLocalizedString(@"Begin Import?", nil), NSLocalizedString(@"Do you want to start importing all report files in the Documents directory into this account?", nil), NSLocalizedString(@"Start Import", nil), ^{
+					[[ReportDownloadCoordinator sharedReportDownloadCoordinator] importReportsIntoAccount:self.selectedAccount];
+					[self.navigationController popViewControllerAnimated:YES];
+				});
 			}
 		}
 	} else if ([key isEqualToString:kExportReportsButton]) {
@@ -539,13 +533,10 @@
 		NSString *appStoreURLString = [NSString stringWithFormat:@"http://itunes.apple.com/app/id%@", productID];
 		[[UIApplication sharedApplication] openURL:[NSURL URLWithString:appStoreURLString]];
 	} else if ([key isEqualToString:kDeleteAccountButton]) {
-		UIAlertView *confirmDeleteAlert = [[[UIAlertView alloc] initWithTitle:NSLocalizedString(@"Delete Account?", nil) 
-																	  message:NSLocalizedString(@"Do you really want to delete this account and all of its data?", nil) 
-																	 delegate:self 
-															cancelButtonTitle:NSLocalizedString(@"Cancel", nil) 
-															otherButtonTitles:NSLocalizedString(@"Delete", nil), nil] autorelease];
-		confirmDeleteAlert.tag = kAlertTagConfirmDelete;
-		[confirmDeleteAlert show];
+		ASConfirmAlert(self, NSLocalizedString(@"Delete Account?", nil), NSLocalizedString(@"Do you really want to delete this account and all of its data?", nil), NSLocalizedString(@"Delete", nil), ^{
+			[self deleteAccount:self.selectedAccount];
+			[self.navigationController popViewControllerAnimated:YES];
+		});
 	} else if ([key isEqualToString:@"SelectVendorIDButton"]) {
 		FieldEditorViewController *vc = nil;
 		if (self.presentedViewController) {
@@ -559,7 +550,7 @@
 		[vc dismissKeyboard];
 		
 		if (!username || username.length == 0 || !password || password.length == 0) {
-			[[[[UIAlertView alloc] initWithTitle:nil message:NSLocalizedString(@"Please enter your username and password first.", nil) delegate:nil cancelButtonTitle:NSLocalizedString(@"OK", nil) otherButtonTitles:nil] autorelease] show];
+			ASShowAlert(self, nil, NSLocalizedString(@"Please enter your username and password first.", nil));
 			return;
 		}
 		
@@ -570,8 +561,7 @@
 		[hud showWhileExecuting:@selector(findVendorIDsWithLogin:) onTarget:self withObject:loginInfo animated:YES];
 	} else if ([key isEqualToString:kDownloadBoxcarButton]) {
 		if ([[UIApplication sharedApplication] canOpenURL:[NSURL URLWithString:@"boxcar://provider/965"]]) {
-			[[[[UIAlertView alloc] initWithTitle:NSLocalizedString(@"Boxcar Already Installed", nil) 
-										 message:NSLocalizedString(@"The Boxcar app is already installed on your device. Please tap \"Add AppSales to Boxcar\" to start receiving push notifications.", nil) delegate:nil cancelButtonTitle:NSLocalizedString(@"OK", nil) otherButtonTitles:nil] autorelease] show];
+			ASShowAlert(self, NSLocalizedString(@"Boxcar Already Installed", nil), NSLocalizedString(@"The Boxcar app is already installed on your device. Please tap \"Add AppSales to Boxcar\" to start receiving push notifications.", nil));
 		} else {
 			[[UIApplication sharedApplication] openURL:[NSURL URLWithString:@"http://itunes.apple.com/app/boxcar/id321493542"]];
 		}
@@ -579,8 +569,7 @@
 		if ([[UIApplication sharedApplication] canOpenURL:[NSURL URLWithString:@"boxcar://provider/965"]]) {
 			[[UIApplication sharedApplication] openURL:[NSURL URLWithString:@"boxcar://provider/965"]];
 		} else {
-			[[[[UIAlertView alloc] initWithTitle:NSLocalizedString(@"Boxcar Not Installed", nil) 
-										 message:NSLocalizedString(@"The Boxcar app is not installed on your device. Please download it from the App Store and try again.", nil) delegate:nil cancelButtonTitle:NSLocalizedString(@"OK", nil) otherButtonTitles:nil] autorelease] show];
+			ASShowAlert(self, NSLocalizedString(@"Boxcar Not Installed", nil), NSLocalizedString(@"The Boxcar app is not installed on your device. Please download it from the App Store and try again.", nil));
 		}
 	}
 }
@@ -633,13 +622,14 @@
 		
 		[MBProgressHUD hideHUDForView:self.navigationController.view animated:YES];
 		
-		UIAlertView *exportCompletedAlert = [[[UIAlertView alloc] initWithTitle:NSLocalizedString(@"Export Completed", nil) 
-																		message:NSLocalizedString(@"The report files of this account have been exported as a Zip archive. You can now access the archive via iTunes file sharing or open it in a suitable app.", nil) 
-																	   delegate:self 
-															  cancelButtonTitle:NSLocalizedString(@"Done", nil) 
-															  otherButtonTitles:NSLocalizedString(@"Open in...", nil), nil] autorelease];
-		exportCompletedAlert.tag = kAlertTagExportCompleted;
-		[exportCompletedAlert show];
+		ASConfirmAlert(self, NSLocalizedString(@"Export Completed", nil), NSLocalizedString(@"The report files of this account have been exported as a Zip archive. You can now access the archive via iTunes file sharing or open it in a suitable app.", nil), NSLocalizedString(@"Open in...", nil), ^{
+			self.documentInteractionController = [UIDocumentInteractionController interactionControllerWithURL:[NSURL fileURLWithPath:self.exportedReportsZipPath]];
+			self.documentInteractionController.delegate = self;
+			BOOL couldPresentAppSelection = [self.documentInteractionController presentOpenInMenuFromRect:self.navigationController.view.bounds inView:self.navigationController.view animated:YES];
+			if (!couldPresentAppSelection) {
+				ASShowAlert(self, NSLocalizedString(@"Error", nil), NSLocalizedString(@"You don't seem to have any app installed that can open Zip files.", nil));
+			}
+		});
 	});
 }
 

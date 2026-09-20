@@ -15,6 +15,7 @@
 #import "ASAccount.h"
 #import "SalesViewController.h"
 #import "UINavigationBar+statusBar.h"
+#import "ASAlertPresenter.h"
 
 @implementation AppSalesAppDelegate
 
@@ -26,8 +27,6 @@
 	[[KKPasscodeLock sharedLock] setEraseOption:NO];
 	
 	srandom(time(NULL));
-	self.window = [[[UIWindow alloc] initWithFrame:[[UIScreen mainScreen] bounds]] autorelease];
-	self.window.tintColor = [UIColor colorWithRed:0.28 green:0.51 blue:0.69 alpha:1.0];
 	
 	NSString *currencyCode = [[NSLocale currentLocale] objectForKey:NSLocaleCurrencyCode];
 	if (![[CurrencyManager sharedManager].availableCurrencies containsObject:currencyCode]) {
@@ -39,7 +38,29 @@
 							  currencyCode, @"CurrencyManagerBaseCurrency",
 							  nil];
 	[[NSUserDefaults standardUserDefaults] registerDefaults:defaults];
+
+	if (@available(iOS 13.0, *)) {
+		// Xcode 27 下由 AppSalesSceneDelegate 创建并显示绑定 UIWindowScene 的窗口。
+		// 此处仅完成与窗口无关的全局初始化，不能再使用 initWithFrame: 创建主窗口。
+		return YES;
+	}
+
+	// 低于 iOS 13 的系统不识别 Scene manifest，继续使用旧窗口路径以保持兼容。
+	self.window = [[[UIWindow alloc] initWithFrame:[[UIScreen mainScreen] bounds]] autorelease];
+	[self configureMainWindow:self.window];
+	if ([launchOptions objectForKey:UIApplicationLaunchOptionsURLKey]) {
+		[self handleOpenURL:[launchOptions objectForKey:UIApplicationLaunchOptionsURLKey]];
+	}
 	
+	return YES;
+}
+
+- (void)configureMainWindow:(UIWindow *)window
+{
+	// Scene 已先将窗口回填到 AppDelegate；保留赋值使 iOS 12 兜底路径也能复用本方法。
+	self.window = window;
+	self.window.tintColor = [UIColor colorWithRed:0.28 green:0.51 blue:0.69 alpha:1.0];
+
 	BOOL iPad = [[UIDevice currentDevice] userInterfaceIdiom] == UIUserInterfaceIdiomPad;
 	if (!iPad) {
 		AccountsViewController *rootViewController = [[[AccountsViewController alloc] initWithStyle:UITableViewStyleGrouped] autorelease];
@@ -57,9 +78,6 @@
 		self.accountsViewController = rootViewController;
 		
 		self.window.rootViewController = navigationController;
-		[self.window makeKeyAndVisible];
-        
-        
 	} else {
 		self.accountsViewController = [[[AccountsViewController alloc] initWithStyle:UITableViewStyleGrouped] autorelease];
 		self.accountsViewController.managedObjectContext = self.managedObjectContext;
@@ -67,13 +85,13 @@
 		self.accountsViewController.delegate = self;
 		UINavigationController *accountsNavController = [[[UINavigationController alloc] initWithRootViewController:self.accountsViewController] autorelease];
 		accountsNavController.navigationBar.translucent = NO;
-        accountsNavController.navigationController.navigationBar.backgroundColor = UIColor.systemBackgroundColor;
+		accountsNavController.navigationController.navigationBar.backgroundColor = UIColor.systemBackgroundColor;
         
 		accountsNavController.toolbarHidden = NO;
 		self.accountsPopover = [[[UIPopoverController alloc] initWithContentViewController:accountsNavController] autorelease];	
 		[self loadAccount:nil];
-		[self.window makeKeyAndVisible];
 	}
+	[self.window makeKeyAndVisible];
 	
 	BOOL migrating = [self migrateDataIfNeeded];
 	if (migrating) {
@@ -88,10 +106,6 @@
 	}
 	
 	[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(reportDownloadFailed:) name:ASReportDownloadFailedNotification object:nil];
-	
-	if ([launchOptions objectForKey:UIApplicationLaunchOptionsURLKey]) {
-		[self.accountsViewController performSelector:@selector(downloadReports:) withObject:nil afterDelay:0.0];
-	}
 	
 	[self showPasscodeLockIfNeeded];
 	if (iPad) {
@@ -108,7 +122,6 @@
 		}
 	}
 	
-	return YES;
 }
 
 - (void)selectAccount:(id)sender
@@ -152,6 +165,16 @@
 }
 
 - (BOOL)application:(UIApplication *)application handleOpenURL:(NSURL *)url
+{
+	return [self handleOpenURL:url];
+}
+
+- (BOOL)application:(UIApplication *)application openURL:(NSURL *)url options:(NSDictionary *)options
+{
+	return [self handleOpenURL:url];
+}
+
+- (BOOL)handleOpenURL:(NSURL *)url
 {
 	[self.accountsViewController performSelector:@selector(downloadReports:) withObject:nil afterDelay:0.0];
 	return YES;
@@ -200,11 +223,9 @@
 	[self saveContext];
 	[[ReportDownloadCoordinator sharedReportDownloadCoordinator] importReportsIntoAccount:account fromDirectory:legacyReportDirectory deleteAfterImport:YES];
 	
-	[[[[UIAlertView alloc] initWithTitle:NSLocalizedString(@"Update Notice", nil) 
-								 message:NSLocalizedString(@"You have updated from an older version of AppSales. Your sales reports are currently being imported. You can start using the app while the import is running.", nil)
-								delegate:nil 
-					   cancelButtonTitle:NSLocalizedString(@"OK", nil) 
-					   otherButtonTitles:nil] autorelease] show];
+	ASShowAlert(self.window.rootViewController,
+				NSLocalizedString(@"Update Notice", nil),
+				NSLocalizedString(@"You have updated from an older version of AppSales. Your sales reports are currently being imported. You can start using the app while the import is running.", nil));
 	return YES;
 }
 
@@ -361,11 +382,7 @@
 {
 	NSString *errorMessage = [[notification userInfo] objectForKey:kASReportDownloadErrorDescription];
 	NSString *alertMessage = [NSString stringWithFormat:NSLocalizedString(@"Downloading reports from iTunes Connect failed. Please try again later or check the iTunes Connect website for anything unusual. %@", nil), (errorMessage) ? errorMessage : @""];
-	[[[[UIAlertView alloc] initWithTitle:NSLocalizedString(@"Error", nil) 
-								 message:alertMessage 
-								delegate:nil 
-					   cancelButtonTitle:NSLocalizedString(@"OK", nil) 
-					   otherButtonTitles:nil] autorelease] show];
+	ASShowAlert(self.window.rootViewController, NSLocalizedString(@"Error", nil), alertMessage);
 }
 
 - (void)dealloc

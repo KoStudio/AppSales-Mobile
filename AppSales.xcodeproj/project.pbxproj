@@ -7,6 +7,8 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		C0D3A7042A00000100A1B2C3 /* ASAlertPresenter.m in Sources */ = {isa = PBXBuildFile; fileRef = C0D3A7032A00000100A1B2C3 /* ASAlertPresenter.m */; };
+		C0D3A7012A00000100A1B2C3 /* AppSalesSceneDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = C0D3A7002A00000100A1B2C3 /* AppSalesSceneDelegate.m */; };
 		0CB834232762229F00A5C319 /* UINavigationBar+statusBar.m in Sources */ = {isa = PBXBuildFile; fileRef = 0CB834222762229F00A5C319 /* UINavigationBar+statusBar.m */; };
 		0CE82C9B200A673100FA531D /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 0CE82C9A200A673100FA531D /* LaunchScreen.storyboard */; };
 		6D81575414CB3C2B005E8F3F /* KKKeychain.m in Sources */ = {isa = PBXBuildFile; fileRef = 6D81574914CB3C2B005E8F3F /* KKKeychain.m */; };
@@ -713,6 +715,10 @@
 		7F709D3B13BC98860008DBAD /* AppSales-Prefix.pch */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "AppSales-Prefix.pch"; sourceTree = "<group>"; };
 		7F709D3C13BC98860008DBAD /* AppSalesAppDelegate.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = AppSalesAppDelegate.h; sourceTree = "<group>"; };
 		7F709D3D13BC98860008DBAD /* AppSalesAppDelegate.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = AppSalesAppDelegate.m; sourceTree = "<group>"; };
+		C0D3A6FF2A00000100A1B2C3 /* AppSalesSceneDelegate.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = AppSalesSceneDelegate.h; sourceTree = "<group>"; };
+		C0D3A7002A00000100A1B2C3 /* AppSalesSceneDelegate.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = AppSalesSceneDelegate.m; sourceTree = "<group>"; };
+		C0D3A7022A00000100A1B2C3 /* ASAlertPresenter.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ASAlertPresenter.h; sourceTree = "<group>"; };
+		C0D3A7032A00000100A1B2C3 /* ASAlertPresenter.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = ASAlertPresenter.m; sourceTree = "<group>"; };
 		7F709D4013BC98860008DBAD /* AppSales.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = AppSales.xcdatamodel; sourceTree = "<group>"; };
 		7F709D4513BC98860008DBAD /* AccountsViewController.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = AccountsViewController.h; sourceTree = "<group>"; };
 		7F709D4613BC98860008DBAD /* AccountsViewController.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = AccountsViewController.m; sourceTree = "<group>"; };
@@ -1364,6 +1370,10 @@
 			children = (
 				7F709D3C13BC98860008DBAD /* AppSalesAppDelegate.h */,
 				7F709D3D13BC98860008DBAD /* AppSalesAppDelegate.m */,
+				C0D3A6FF2A00000100A1B2C3 /* AppSalesSceneDelegate.h */,
+				C0D3A7002A00000100A1B2C3 /* AppSalesSceneDelegate.m */,
+				C0D3A7022A00000100A1B2C3 /* ASAlertPresenter.h */,
+				C0D3A7032A00000100A1B2C3 /* ASAlertPresenter.m */,
 				7FDF601C13DD2107005F1E2D /* Helpers */,
 				7FDF601F13DD21BB005F1E2D /* Accounts and Settings */,
 				7FDF601D13DD2125005F1E2D /* Dashboard */,
@@ -2791,6 +2801,8 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				C0D3A7042A00000100A1B2C3 /* ASAlertPresenter.m in Sources */,
+				C0D3A7012A00000100A1B2C3 /* AppSalesSceneDelegate.m in Sources */,
 				7F709D3A13BC98860008DBAD /* main.m in Sources */,
 				7F709D3E13BC98860008DBAD /* AppSalesAppDelegate.m in Sources */,
 				7F709D4113BC98860008DBAD /* AppSales.xcdatamodeld in Sources */,
@@ -2920,7 +2932,7 @@
 				GCC_PREFIX_HEADER = "OtherSources/AppSales-Prefix.pch";
 				HEADER_SEARCH_PATHS = "";
 				INFOPLIST_FILE = "Support/AppSales-Info.plist";
-				IPHONEOS_DEPLOYMENT_TARGET = 12.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.6;
 				ONLY_ACTIVE_ARCH = YES;
 				PRODUCT_BUNDLE_IDENTIFIER = com.ko.appsalesAppSalesMobile;
 				PRODUCT_NAME = AppSalesMobile;
@@ -2939,7 +2951,7 @@
 				GCC_PREFIX_HEADER = "OtherSources/AppSales-Prefix.pch";
 				HEADER_SEARCH_PATHS = "";
 				INFOPLIST_FILE = "Support/AppSales-Info.plist";
-				IPHONEOS_DEPLOYMENT_TARGET = 12.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.6;
 				PRODUCT_BUNDLE_IDENTIFIER = com.ko.appsalesAppSalesMobile;
 				PRODUCT_NAME = AppSalesMobile;
 				TARGETED_DEVICE_FAMILY = "1,2";

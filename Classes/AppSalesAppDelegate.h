@@ -36,6 +36,10 @@
 - (void)saveContext;
 - (NSString *)applicationDocumentsDirectory;
 - (NSURL *)applicationSupportDirectory;
+// Scene 创建并绑定 UIWindowScene 后调用。这里保留原有根控制器和启动后业务逻辑。
+- (void)configureMainWindow:(UIWindow *)window;
+// 供 Scene 的冷启动和热启动 URL 回调复用原有下载入口。
+- (BOOL)handleOpenURL:(NSURL *)url;
 - (void)loadAccount:(ASAccount *)account;
 - (void)selectAccount:(id)sender;
 - (void)showPasscodeLockIfNeeded;
