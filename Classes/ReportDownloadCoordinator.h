@@ -24,5 +24,6 @@
 - (void)cancelAllDownloads;
 - (void)importReportsIntoAccount:(ASAccount *)account;
 - (void)importReportsIntoAccount:(ASAccount *)account fromDirectory:(NSString *)path deleteAfterImport:(BOOL)deleteFlag;
+- (void)importReportsIntoAccount:(ASAccount *)account fromDirectoryURL:(NSURL *)url;
 
 @end

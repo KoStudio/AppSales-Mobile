@@ -34,6 +34,8 @@
 		
 		[account addObserver:self forKeyPath:@"isDownloadingReports" options:NSKeyValueObservingOptionNew context:nil];
 		[account addObserver:self forKeyPath:@"downloadStatus" options:NSKeyValueObservingOptionNew context:nil];
+		// 导入器逐文件更新此值；观察它即可在账户列表显示真实进度，无需轮询。
+		[account addObserver:self forKeyPath:@"downloadProgress" options:NSKeyValueObservingOptionNew context:nil];
 	}
 	return self;
 }
@@ -42,7 +44,8 @@
 {
 	if (account.isDownloadingReports) {
 		[activityIndicator startAnimating];
-		statusLabel.text = account.downloadStatus;
+		NSInteger percent = (NSInteger)lrintf(account.downloadProgress * 100.0f);
+		statusLabel.text = [NSString stringWithFormat:@"%@  %ld%%", account.downloadStatus ?: @"", (long)percent];
 	} else {
 		[activityIndicator stopAnimating];
 		statusLabel.text = @"";
@@ -58,6 +61,7 @@
 {
 	[account removeObserver:self forKeyPath:@"isDownloadingReports"];
 	[account removeObserver:self forKeyPath:@"downloadStatus"];
+	[account removeObserver:self forKeyPath:@"downloadProgress"];
 	[activityIndicator release];
 	[statusLabel release];
 	[account release];

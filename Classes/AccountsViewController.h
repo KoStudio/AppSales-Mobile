@@ -18,12 +18,14 @@
 @class ASAccount;
 @protocol AccountsViewControllerDelegate;
 
-@interface AccountsViewController : UITableViewController <NSFetchedResultsControllerDelegate, UIAlertViewDelegate, FieldEditorViewControllerDelegate, KKPasscodeSettingsViewControllerDelegate, UIDocumentInteractionControllerDelegate>
+@interface AccountsViewController : UITableViewController <NSFetchedResultsControllerDelegate, FieldEditorViewControllerDelegate, KKPasscodeSettingsViewControllerDelegate, UIDocumentInteractionControllerDelegate, UIDocumentPickerDelegate>
 {
 	id<AccountsViewControllerDelegate> delegate;
 	NSArray *accounts;
 	NSManagedObjectContext *managedObjectContext;
 	ASAccount *selectedAccount;
+	// 文件夹选择器异步返回；暂存用户点下“Import Reports…”时对应的账户。
+	ASAccount *importAccount;
 	UIBarButtonItem *refreshButtonItem;
 	FieldSpecifier *passcodeLockField;
 	FieldEditorViewController *settingsViewController;
@@ -36,6 +38,7 @@
 @property (nonatomic, retain) UIBarButtonItem *refreshButtonItem;
 @property (nonatomic, retain) NSArray *accounts;
 @property (nonatomic, retain) ASAccount *selectedAccount;
+@property (nonatomic, retain) ASAccount *importAccount;
 @property (nonatomic, retain) NSManagedObjectContext *managedObjectContext;
 @property (nonatomic, retain) NSString *exportedReportsZipPath;
 @property (nonatomic, retain) UIDocumentInteractionController *documentInteractionController;

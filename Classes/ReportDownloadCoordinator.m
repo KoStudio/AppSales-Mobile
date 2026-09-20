@@ -116,6 +116,31 @@
 	[reportDownloadQueue addOperation:operation];
 }
 
+- (void)importReportsIntoAccount:(ASAccount *)account fromDirectoryURL:(NSURL *)url
+{
+	ReportImportOperation *operation = [[[ReportImportOperation alloc] initWithAccount:account] autorelease];
+	operation.importDirectoryURL = url;
+	operation.deleteOriginalFilesAfterImport = NO;
+	// 与旧 Documents 导入入口保持相同状态语义，供账户列表进度 UI 观察。
+	account.isDownloadingReports = YES;
+	account.downloadStatus = NSLocalizedString(@"Waiting to import...", nil);
+	account.downloadProgress = 0.0;
+	[[UIApplication sharedApplication] setIdleTimerDisabled:YES];
+	UIBackgroundTaskIdentifier backgroundTaskID = [[UIApplication sharedApplication] beginBackgroundTaskWithExpirationHandler:^(void) {
+		NSLog(@"Background task for importing has expired!");
+	}];
+	[operation setCompletionBlock:^ {
+		dispatch_async(dispatch_get_main_queue(), ^ {
+			account.isDownloadingReports = NO;
+			[[UIApplication sharedApplication] setIdleTimerDisabled:NO];
+			if (backgroundTaskID != UIBackgroundTaskInvalid) {
+				[[UIApplication sharedApplication] endBackgroundTask:backgroundTaskID];
+			}
+		});
+	}];
+	[reportDownloadQueue addOperation:operation];
+}
+
 - (void)dealloc
 {
 	[reportDownloadQueue removeObserver:self forKeyPath:@"operationCount"];

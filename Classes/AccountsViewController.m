@@ -43,7 +43,7 @@
 
 @implementation AccountsViewController
 
-@synthesize managedObjectContext, accounts, selectedAccount, refreshButtonItem, delegate, exportedReportsZipPath, documentInteractionController;
+@synthesize managedObjectContext, accounts, selectedAccount, importAccount, refreshButtonItem, delegate, exportedReportsZipPath, documentInteractionController;
 
 - (void)viewDidLoad
 {
@@ -316,9 +316,10 @@
 	
 	FieldSpecifier *importButtonField = [FieldSpecifier buttonFieldWithKey:kImportReportsButton title:NSLocalizedString(@"Import Reports...", nil)];
 	FieldSpecifier *exportButtonField = [FieldSpecifier buttonFieldWithKey:kExportReportsButton title:NSLocalizedString(@"Export Reports...", nil)];
+	// 说明显示在账户页：路径由 Files 选择器提供，用户无需也不能手工输入沙盒路径。
 	FieldSectionSpecifier *importExportSection = [FieldSectionSpecifier sectionWithFields:[NSArray arrayWithObjects:importButtonField, exportButtonField, nil] 
 																					title:nil 
-																			  description:nil /*NSLocalizedString(@"Use iTunes file sharing to import report files from your computer.",nil)*/];
+															  description:NSLocalizedString(@"Choose a folder in Files. Supported reports: .txt or .txt.gz (for example, Sales.txt or Sales.txt.gz). Select the folder itself, not an individual file; its displayed Files path is used automatically.", nil)];
 	
 	NSMutableArray *productFields = [NSMutableArray array];
 	NSArray *allProducts = [[account.products allObjects] sortedArrayUsingDescriptors:[NSArray arrayWithObject:[[[NSSortDescriptor alloc] initWithKey:@"productID" ascending:NO] autorelease]]];
@@ -516,15 +517,14 @@
 		if (account.isDownloadingReports) {
 			ASShowAlert(self, nil, NSLocalizedString(@"AppSales is already importing reports for this account. Please wait until the current import has finished.", nil));
 		} else {
-			BOOL canStartImport = [ReportImportOperation filesAvailableToImport];
-			if (!canStartImport) {
-				ASShowAlert(self, NSLocalizedString(@"No Files Found", nil), NSLocalizedString(@"The Documents directory does not contain any .txt files. Please use iTunes File Sharing to transfer report files to your device.", nil));
-			} else {
-				ASConfirmAlert(self, NSLocalizedString(@"Begin Import?", nil), NSLocalizedString(@"Do you want to start importing all report files in the Documents directory into this account?", nil), NSLocalizedString(@"Start Import", nil), ^{
-					[[ReportDownloadCoordinator sharedReportDownloadCoordinator] importReportsIntoAccount:self.selectedAccount];
-					[self.navigationController popViewControllerAnimated:YES];
-				});
-			}
+			// UIDocumentPicker 异步返回，因此先保存此次导入要写入的账户。
+			self.importAccount = account;
+			// 文件夹不支持 Import 模式；Open 模式返回原目录的安全作用域 URL。
+			// ReportImportOperation 会在后台导入期间管理该 URL 的访问权限。
+			UIDocumentPickerViewController *picker = [[[UIDocumentPickerViewController alloc] initWithDocumentTypes:[NSArray arrayWithObject:@"public.folder"] inMode:UIDocumentPickerModeOpen] autorelease];
+			picker.delegate = self;
+			// Import mode copies the chosen folder into the app sandbox, so reports remain readable in the background.
+			[self presentViewController:picker animated:YES completion:nil];
 		}
 	} else if ([key isEqualToString:kExportReportsButton]) {
 		[self doExport];
@@ -687,6 +687,36 @@
 	self.documentInteractionController = nil;
 }
 
+- (void)documentPicker:(UIDocumentPickerViewController *)controller didPickDocumentAtURL:(NSURL *)url
+{
+	// Open 模式返回原始 Files 目录；导入器持有 URL 并在后台任务中申请安全作用域权限。
+	NSString *directory = url.path;
+	// 预检查同样发生在 App 沙盒外。未先申请权限时，contentsOfDirectory 会返回空数组，
+	// 即使 Files 里实际存在报告文件；真正导入时 ReportImportOperation 会再次申请权限。
+	BOOL accessingSecurityScopedDirectory = [url startAccessingSecurityScopedResource];
+	BOOL hasReportFiles = [ReportImportOperation filesAvailableToImportInDirectory:directory];
+	if (accessingSecurityScopedDirectory) {
+		[url stopAccessingSecurityScopedResource];
+	}
+	if (!hasReportFiles) {
+		ASShowAlert(self, NSLocalizedString(@"No Report Files Found", nil), [NSString stringWithFormat:NSLocalizedString(@"Selected folder:\n%@\n\nPlace .txt or .txt.gz report files directly in this folder. Examples: Sales.txt or Sales.txt.gz. Do not type a path manually; choose the folder in Files.", nil), directory]);
+		return;
+	}
+
+	ASAccount *account = self.importAccount;
+	// 导入器只读取该目录且 deleteAfterImport:NO，用户在 Files 中的原始文件会保留。
+	ASConfirmAlert(self, NSLocalizedString(@"Begin Import?", nil), [NSString stringWithFormat:NSLocalizedString(@"Selected folder:\n%@\n\nAll .txt and .txt.gz files directly in this folder will be imported. Original files will be kept.", nil), directory], NSLocalizedString(@"Start Import", nil), ^{
+		[[ReportDownloadCoordinator sharedReportDownloadCoordinator] importReportsIntoAccount:account fromDirectoryURL:url];
+		[self.navigationController popViewControllerAnimated:YES];
+	});
+}
+
+- (void)documentPickerWasCancelled:(UIDocumentPickerViewController *)controller
+{
+	// 取消时释放暂存账户，避免下一次选择误用上一次的导入目标。
+	self.importAccount = nil;
+}
+
 - (void)fieldEditorDidCancel:(FieldEditorViewController *)editor
 {
 	[editor dismissViewControllerAnimated:YES completion:nil];
@@ -720,6 +750,7 @@
 	[refreshButtonItem release];
 	[accounts release];
 	[selectedAccount release];
+	[importAccount release];
 	[managedObjectContext release];
 	[exportedReportsZipPath release];
 	[documentInteractionController release];

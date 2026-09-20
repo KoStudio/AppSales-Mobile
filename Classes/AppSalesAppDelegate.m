@@ -59,6 +59,9 @@
 {
 	// Scene 已先将窗口回填到 AppDelegate；保留赋值使 iOS 12 兜底路径也能复用本方法。
 	self.window = window;
+	// Scene 下导航控制器的内容不会保证覆盖状态栏上方的安全区域。若 UIWindow 保持
+	// 默认黑色，该区域会露出黑条；这里与导航栏统一使用系统背景色。
+	self.window.backgroundColor = UIColor.systemBackgroundColor;
 	self.window.tintColor = [UIColor colorWithRed:0.28 green:0.51 blue:0.69 alpha:1.0];
 
 	BOOL iPad = [[UIDevice currentDevice] userInterfaceIdiom] == UIUserInterfaceIdiomPad;

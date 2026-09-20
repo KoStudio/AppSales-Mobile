@@ -13,15 +13,22 @@
 
 @implementation ReportImportOperation
 
-@synthesize importDirectory, deleteOriginalFilesAfterImport;
+@synthesize importDirectory, importDirectoryURL, deleteOriginalFilesAfterImport;
 
 + (BOOL)filesAvailableToImport
 {
 	NSString *docPath = [NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES) lastObject];
+	return [self filesAvailableToImportInDirectory:docPath];
+}
+
++ (BOOL)filesAvailableToImportInDirectory:(NSString *)directory
+{
+	// 不递归扫描子目录：用户在 Files 中选定的那个目录就是一次导入的明确边界。
+	// 与 main 中的实际导入规则保持一致，避免“可以开始导入”却没有可处理文件。
 	NSFileManager *fm = [[[NSFileManager alloc] init] autorelease];
-	NSArray *filenames = [fm contentsOfDirectoryAtPath:docPath error:NULL];
+	NSArray *filenames = [fm contentsOfDirectoryAtPath:directory error:NULL];
 	for (NSString *filename in filenames) {
-		if ([[filename pathExtension] isEqualToString:@"txt"]) {
+		if ([[filename pathExtension] isEqualToString:@"txt"] || [filename hasSuffix:@".txt.gz"]) {
 			return YES;
 		}
 	}
@@ -72,8 +79,13 @@
 	NSArray *existingWeeklyReportDates = [[moc executeFetchRequest:existingWeeklyReportsRequest error:NULL] valueForKey:@"startDate"];
 	NSMutableSet *existingWeeklyReportDatesSet = [NSMutableSet setWithArray:existingWeeklyReportDates];
 	
+	BOOL accessingSecurityScopedDirectory = NO;
 	NSString *docPath = nil;
-	if (self.importDirectory) {
+	if (self.importDirectoryURL) {
+		// Open 模式返回的 Files 目录不在 App 沙盒；后台任务开始/结束时成对管理权限。
+		accessingSecurityScopedDirectory = [self.importDirectoryURL startAccessingSecurityScopedResource];
+		docPath = self.importDirectoryURL.path;
+	} else if (self.importDirectory) {
 		docPath = [[self.importDirectory retain] autorelease];
 	} else {
 		docPath = [NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES) lastObject];
@@ -88,6 +100,7 @@
 	
 	for (NSString *fileName in fileNames) {
 		NSAutoreleasePool *innerPool = [NSAutoreleasePool new];
+		// 仅接受 App Store Connect 导出的纯文本报告及其 gzip 压缩版本；其余文件静默跳过。
 		if (![[fileName pathExtension] isEqualToString:@"txt"] && ![fileName hasSuffix:@"txt.gz"]) {
 			[innerPool release];
 			continue;
@@ -158,6 +171,9 @@
 		_account.downloadStatus = [NSString stringWithFormat:NSLocalizedString(@"Finished (%i imported)", nil), numberOfReportsImported];
 		_account.downloadProgress = 1.0;
 	});
+	if (accessingSecurityScopedDirectory) {
+		[self.importDirectoryURL stopAccessingSecurityScopedResource];
+	}
 	[pool release];
 }
 
@@ -166,6 +182,7 @@
 	[_account release];
 	[psc release];
 	[accountObjectID release];
+	[importDirectoryURL release];
 	[super dealloc];
 }
 
