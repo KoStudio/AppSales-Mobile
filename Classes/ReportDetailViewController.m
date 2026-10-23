@@ -1,6 +1,7 @@
 //
 //  ReportDetailViewController.m
 //  AppSales
+//  展示报表明细、地图及切换和导出操作，底部工具栏随安全区域布局。
 //
 //  Created by Ole Zorn on 21.07.11.
 //  Copyright 2011 omz:software. All rights reserved.
@@ -76,15 +77,15 @@
 	[headerView addSubview:headerIconView];
 	[self.view addSubview:headerView];
 	
-	CGFloat toolbarHeight = UIInterfaceOrientationIsLandscape(self.interfaceOrientation) ? 32.0 : 44.0;
-	
 	CGRect tableViewFrame = (mapHidden) ? CGRectMake(0, 20, self.view.bounds.size.width, self.view.bounds.size.height - 20) : CGRectMake(0, 208, self.view.bounds.size.width, self.view.bounds.size.height - 208);
 	self.tableView = [[[UITableView alloc] initWithFrame:tableViewFrame style:UITableViewStylePlain] autorelease];
 	tableView.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
 	tableView.separatorInset = UIEdgeInsetsMake(0, 40, 0, 0);
 	tableView.backgroundColor = [UIColor clearColor];
-	tableView.scrollIndicatorInsets = UIEdgeInsetsMake(0, 0, toolbarHeight, 0);
-	tableView.contentInset = tableView.scrollIndicatorInsets;
+
+	// 底部遮挡由布局回调统一计算，避免系统再次叠加安全区域留白。
+	tableView.contentInsetAdjustmentBehavior = UIScrollViewContentInsetAdjustmentNever;
+	tableView.automaticallyAdjustsScrollIndicatorInsets = NO;
 	tableView.dataSource = self;
 	tableView.delegate = self;
 	
@@ -94,9 +95,16 @@
 		self.navigationItem.rightBarButtonItem = [[[UIBarButtonItem alloc] initWithImage:[UIImage imageNamed:(mapHidden) ? @"ShowMap.png" : @"HideMap.png"] style:UIBarButtonItemStyleBordered target:self action:@selector(toggleMap:)] autorelease];
 	}
 	
-	self.toolbar = [[[UIToolbar alloc] initWithFrame:CGRectMake(0, self.view.bounds.size.height - toolbarHeight, self.view.bounds.size.width, toolbarHeight)] autorelease];
-	toolbar.autoresizingMask = UIViewAutoresizingFlexibleTopMargin | UIViewAutoresizingFlexibleWidth;
+	self.toolbar = [[[UIToolbar alloc] initWithFrame:CGRectZero] autorelease];
+	toolbar.translatesAutoresizingMaskIntoConstraints = NO;
 	[self.view addSubview:toolbar];
+
+	// 整条工具栏位于安全区域内，所有按钮共同避开 Home Indicator 和横屏边缘。
+	[NSLayoutConstraint activateConstraints:@[
+		[toolbar.leadingAnchor constraintEqualToAnchor:self.view.safeAreaLayoutGuide.leadingAnchor],
+		[toolbar.trailingAnchor constraintEqualToAnchor:self.view.safeAreaLayoutGuide.trailingAnchor],
+		[toolbar.bottomAnchor constraintEqualToAnchor:self.view.safeAreaLayoutGuide.bottomAnchor]
+	]];
 	
 	float segmentWidth = 75.0;
 	UISegmentedControl *modeControl = [[[UISegmentedControl alloc] initWithItems:[NSArray arrayWithObjects:NSLocalizedString(@"Apps", nil), NSLocalizedString(@"Countries", nil), nil]] autorelease];
@@ -127,15 +135,27 @@
 	[self updateHeader];
 }
 
+// 在旋转、容器尺寸或安全区域变化后，为列表预留整条工具栏及底部安全区域。
+- (void)viewDidLayoutSubviews
+{
+	[super viewDidLayoutSubviews];
+
+	CGFloat bottomInset = MAX(0.0, CGRectGetMaxY(self.tableView.frame) - CGRectGetMinY(self.toolbar.frame)); // 列表底部被工具栏覆盖的高度
+
+	UIEdgeInsets contentInset = self.tableView.contentInset; // 保留列表其余方向的既有留白
+	contentInset.bottom = bottomInset;
+	self.tableView.contentInset = contentInset;
+	self.tableView.scrollIndicatorInsets = contentInset;
+}
+
 - (void)willAnimateRotationToInterfaceOrientation:(UIInterfaceOrientation)toInterfaceOrientation duration:(NSTimeInterval)duration
 {
 	if (UIInterfaceOrientationIsLandscape(toInterfaceOrientation) && !mapHidden) {
 		[self toggleMap:nil];
 	}
-	CGFloat toolbarHeight = UIInterfaceOrientationIsLandscape(toInterfaceOrientation) ? 32.0 : 44.0;
-	self.toolbar.frame = CGRectMake(0, self.view.bounds.size.height - toolbarHeight, self.view.bounds.size.width, toolbarHeight);
-	self.tableView.scrollIndicatorInsets = UIEdgeInsetsMake(0, 0, toolbarHeight, 0);
-	self.tableView.contentInset = UIEdgeInsetsMake(0, 0, toolbarHeight, 0);
+
+	// 旋转后的工具栏位置和列表留白由安全区域及布局回调统一更新。
+	[self.view setNeedsLayout];
 }
 
 - (void)didRotateFromInterfaceOrientation:(UIInterfaceOrientation)fromInterfaceOrientation
