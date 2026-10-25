@@ -1,6 +1,7 @@
 //
 //  Report.m
 //  AppSales
+//  解析销售报表，并按产品、国家和交易类型汇总收入与销售数量。
 //
 //  Created by Ole Zorn on 02.07.11.
 //  Copyright (c) 2011 omz:software. All rights reserved.
@@ -471,6 +472,7 @@
 	return total;
 }
 
+// 返回含促销标识的销售类型，供缓存汇总和国家／产品明细统计使用。
 + (NSSet *)combinedPaidTransactionTypes
 {
 	static NSSet *combinedPaidTransactionTypes = nil;
@@ -488,6 +490,10 @@
 							@"IA1. ",	//In-App Purchase
 							@"IA9",		//In-App Subscription
 							@"IA9. ",	//In-App Subscription
+							@"IAY",      // 自动续期订阅
+							@"IAY. ",    // 自动续期订阅（旧缓存的空白促销标识）
+							@"IAY-M",    // Mac 自动续期订阅
+							@"IAY-M. ",  // Mac 自动续期订阅（旧缓存的空白促销标识）
 							@"1.GP",	//GP = Gift Purchase
 							@"1F.GP",
 							@"1T.GP",
@@ -575,6 +581,7 @@
 	return combinedPromoCodeTransactionTypes;
 }
 
+// 返回不含促销标识的销售类型，供指定国家和产品的交易统计使用。
 + (NSSet *)paidTransactionTypes
 {
 	static NSSet *paidTransactionTypes = nil;
@@ -586,6 +593,8 @@
 								@"F1",		//Mac App
 								@"IA1",		//In-App Purchase
 								@"IA9",		//In-App Subscription
+								@"IAY",   // 自动续期订阅
+								@"IAY-M", // Mac 自动续期订阅
 								nil];
 	}
 	return paidTransactionTypes;
